@@ -1,0 +1,105 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /******************************************
+     * USERS COLLECTION
+     ******************************************/
+    match /users/{userId} {
+      // Read permissions:
+      // - A user can read their own document
+      // - Admins and Managers can read all user documents
+      allow read: if request.auth != null &&
+        (request.auth.uid == userId ||
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'manager']);
+
+      // Write permissions:
+      // - Admins and Managers can create, update, delete users
+      allow create, update, delete: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'manager'];
+    }
+
+    /******************************************
+     * ATTENDANCE COLLECTION
+     ******************************************/
+    match /attendance/{docId} {
+      // Employees can read/write their own attendance
+      // Admins and Managers can read/write everything
+      allow read, write: if request.auth != null &&
+        (request.auth.uid == resource.data.userId ||
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'manager']);
+    }
+
+    /******************************************
+     * LEAVE REQUESTS COLLECTION
+     ******************************************/
+    match /leaveRequests/{docId} {
+      // Employees can create/read/update their own leave requests
+      // Admins and Managers can read/update all
+      allow read: if request.auth != null &&
+        (request.auth.uid == resource.data.userId ||
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'manager']);
+
+      allow create: if request.auth != null &&
+        request.auth.uid == request.resource.data.userId;
+
+      allow update: if request.auth != null &&
+        (request.auth.uid == resource.data.userId ||
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'manager']);
+    }
+
+    /******************************************
+     * NEWS & EVENTS COLLECTION
+     ******************************************/
+    match /newsEvents/{docId} {
+      // Everyone can read
+      allow read: if request.auth != null;
+
+      // Admin and Manager can create, update, delete
+      allow write: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'manager'];
+    }
+
+    /******************************************
+     * COMPANY HOLIDAYS COLLECTION
+     ******************************************/
+    match /companyHolidays/{docId} {
+      // Employees can only read
+      allow read: if request.auth != null;
+
+      // Admin and Manager can create, update, delete
+      allow write: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'manager'];
+    }
+
+    /******************************************
+     * COMPANY POLICIES COLLECTION
+     ******************************************/
+    match /companyPolicies/{docId} {
+      // Employees can only read policies
+      allow read: if request.auth != null;
+      
+      // Admin and Manager can create, update, delete policies
+      allow write: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'manager'];
+    }
+
+    /******************************************
+     * WORK TIMERS COLLECTION (Clock-In / Clock-Out)
+     ******************************************/
+    match /workTimers/{docId} {
+      // Employees can read/write their own timers
+      // Admins and Managers can read/write everything
+      allow read, write: if request.auth != null &&
+        (request.auth.uid == resource.data.userId ||
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'manager']);
+    }
+
+    /******************************************
+     * DEFAULT DENY RULE
+     ******************************************/
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

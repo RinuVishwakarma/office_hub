@@ -1,0 +1,47 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Users collection - allow authenticated users to read/write their own data
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      // Allow all authenticated users to read user documents (for employee lists)
+      allow read: if request.auth != null;
+    }
+    
+    // Work Timers - allow authenticated users to manage their own timers
+    match /workTimers/{docId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Attendance - allow authenticated users to manage their own attendance
+    match /attendance/{docId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Leave Requests - allow authenticated users to manage leave requests
+    match /leaveRequests/{docId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // News & Events - allow all authenticated users to read
+    match /newsEvents/{docId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Company Holidays - allow all authenticated users to read
+    match /companyHolidays/{docId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Company Policies - allow all authenticated users to read
+    match /companyPolicies/{docId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Departments - allow authenticated users to read
+    match /departments/{docId} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}

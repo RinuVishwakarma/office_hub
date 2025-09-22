@@ -1,0 +1,63 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow authenticated users to read and write their own data
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Allow authenticated users to read all users (for employee lists, etc.)
+    match /users/{document=**} {
+      allow read: if request.auth != null;
+    }
+    
+    // Allow authenticated users to manage work timers
+    match /workTimers/{document=**} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Allow authenticated users to manage attendance records
+    match /attendance/{document=**} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Allow authenticated users to manage leave requests
+    match /leaveRequests/{document=**} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Allow authenticated users to read news and events
+    match /newsEvents/{document=**} {
+      allow read: if request.auth != null;
+      // Only admin and managers can write news/events
+      allow write: if request.auth != null && 
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'manager');
+    }
+    
+    // Allow authenticated users to read company policies
+    match /companyPolicies/{document=**} {
+      allow read: if request.auth != null;
+      // Only admin can write policies
+      allow write: if request.auth != null && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // Allow authenticated users to read company holidays
+    match /companyHolidays/{document=**} {
+      allow read: if request.auth != null;
+      // Only admin can write holidays
+      allow write: if request.auth != null && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // Allow authenticated users to manage departments
+    match /departments/{document=**} {
+      allow read: if request.auth != null;
+      // Only admin can write departments
+      allow write: if request.auth != null && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+  }
+}
