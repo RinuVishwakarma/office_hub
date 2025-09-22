@@ -843,7 +843,7 @@ const ManagerDashboard: React.FC = () => {
             <CardDescription>Team attendance over the past 7 days</CardDescription>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300} as any>
+            <ResponsiveContainer width="100%" height={300}>
               <BarChart data={weeklyAttendanceData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="day" />
@@ -864,7 +864,7 @@ const ManagerDashboard: React.FC = () => {
           </CardHeader>
           <CardContent>
             {leaveTypeData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300} as any>
+              <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
                     data={leaveTypeData}
